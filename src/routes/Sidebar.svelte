@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { VirtualFileSystem } from '$lib/fs';
+    import type { VirtualFileSystem } from '$lib/fs';
     import FileTree from './FileTree.svelte';
 
     let sidebar: HTMLDivElement;
@@ -32,11 +32,12 @@
         window.removeEventListener('mouseup', stopResizing);
     }
 
-    const fs = new VirtualFileSystem();
+    export let fs: VirtualFileSystem;
+    export let selectedFile: string;
 </script>
 
 <div class="sidebar" bind:this={sidebar} style:width={`${sidebarWidth}px`}>
-    <FileTree {fs} />
+    <FileTree {fs} bind:selectedFile />
     <div class="dragger" on:mousedown={handleDrag}></div>
 </div>
 

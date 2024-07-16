@@ -2,6 +2,7 @@
     import type { VirtualFileSystem } from '$lib/fs';
 
     export let fs: VirtualFileSystem;
+    export let selectedFile: string;
 
     const files = fs.filesList;
 
@@ -27,6 +28,11 @@
     }
 </script>
 
+<ul>
+    {#each $files.sort() as key}
+        <li on:click={() => (selectedFile = key)}>{key}</li>
+    {/each}
+</ul>
 <div class="wrapper">
     <input
         type="file"
@@ -35,32 +41,48 @@
         on:input={uploadFile}
         on:dragenter={onDragEnter}
         on:dragleave={onDragLeave} />
-    <div class="dropbox" class:active={uploadIsActive}>
+    <div
+        class="dropbox"
+        role="button"
+        tabindex="0"
+        class:active={uploadIsActive}>
         <h4>Drop files here</h4>
     </div>
-    <ul>
-        {#each $files.sort() as key}
-            <li>{key}</li>
-        {/each}
-    </ul>
 </div>
 
 <style>
     ul {
         list-style: none;
         padding: 0;
-        margin: 4px;
-        background-color: rgba(0, 0, 0, 0.1);
+        /* background-color: rgba(0, 0, 0, 0.1);
         box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
-        height: 100%;
+        height: 100%; */
+        width: 100%;
         display: flex;
+        flex-direction: column;
         justify-content: space-between;
-        align-items: stretch;
+        align-items: srtetch;
+        z-index: 1;
+        flex: 1;
+        margin: 0;
     }
 
     li {
         padding: 5px 10px;
+        margin: 0;
         cursor: pointer;
+        height: fit-content;
+        width: 100%;
+        box-sizing: border-box;
+        background-color: #fff;
+    }
+
+    li:first-child {
+        margin-top: 40px;
+    }
+
+    li:nth-child(odd) {
+        background-color: #f9f9f9;
     }
 
     li:hover {
@@ -69,6 +91,12 @@
 
     .wrapper {
         position: relative;
+        flex-direction: column;
+        display: flex;
+        align-items: stretch;
+        height: 100%;
+        width: 100%;
+        margin-right: 4px;
     }
 
     input[type='file'],
@@ -76,8 +104,12 @@
         position: absolute;
         top: 0;
         width: 100%;
-        height: 100vh;
+        height: 100%;
         opacity: 0;
+    }
+
+    input[type='file'] {
+        z-index: 2;
     }
 
     input[type='file']:hover {
@@ -85,8 +117,6 @@
     }
 
     .dropbox {
-        pointer-events: none;
-        touch-action: none;
         z-index: 1;
         transition: opacity 0.3s ease-in-out;
         box-sizing: border-box;
@@ -97,6 +127,8 @@
         border: 8px dashed #fff;
         background-color: #000;
         color: #fff;
+        height: 100%;
+        width: 100%;
     }
 
     .dropbox.active {
