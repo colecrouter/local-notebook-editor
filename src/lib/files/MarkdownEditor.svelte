@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { createEventDispatcher, onMount } from 'svelte';
     import { marked } from 'marked';
 
     export let markdown: string | string[];
@@ -7,11 +7,14 @@
 
     let compiledMarkdown: string;
 
+    const dispatch = createEventDispatcher();
+
     // Function to compile Markdown
     async function compileMarkdown() {
         compiledMarkdown = await marked(
             typeof markdown === 'string' ? markdown : markdown.join(''),
         );
+        dispatch('updated', { markdown: compiledMarkdown });
     }
 
     // Compile markdown on initial load and on changes

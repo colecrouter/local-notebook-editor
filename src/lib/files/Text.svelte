@@ -2,15 +2,17 @@
 </script>
 
 <script lang="ts">
-    import { onDestroy, onMount } from 'svelte';
+    import { createEventDispatcher, onDestroy, onMount } from 'svelte';
     import loader from '@monaco-editor/loader';
     import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
-    export let text = '';
+    export let data = '';
 
     let editor: Monaco.editor.IStandaloneCodeEditor;
     let monaco: typeof Monaco;
     let editorContainer: HTMLElement;
+
+    const dispatch = createEventDispatcher();
 
     onMount(async () => {
         // Import our 'monaco.ts' file here
@@ -22,7 +24,7 @@
 
         // Your monaco instance is ready, let's display some code!
         editor = monaco.editor.create(editorContainer, {
-            value: text,
+            value: data,
             theme: 'vs-light',
             scrollBeyondLastLine: false,
             renderWhitespace: 'all',
@@ -30,8 +32,11 @@
                 enabled: true,
             },
         });
-        const model = monaco.editor.createModel(text);
+        const model = monaco.editor.createModel(data);
         editor.setModel(model);
+        editor.onDidChangeModelContent(() => {
+            dispatch('updated', { text: editor.getValue() });
+        });
     });
 
     onDestroy(() => {

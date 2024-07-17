@@ -1,10 +1,23 @@
 <script lang="ts">
-    import type { VirtualFileSystem } from '$lib/fs';
+    import type { EmscriptenFS } from '$lib/fs';
+    import type { Writable } from 'svelte/store';
 
-    export let fs: VirtualFileSystem;
+    export let fs: Writable<EmscriptenFS | undefined>;
     export let selectedFile: string;
 
-    const files = fs.filesList;
+    let files: string[] = [];
+    fs.subscribe(async (f) => {
+        // Sync virtual fs with indexedDB
+        await new Promise((resolve, reject) =>
+            $fs?.syncfs(true, (err) => {
+                if (err) reject(err);
+                resolve(err);
+            }),
+        );
+        // Ignore . and .. directories
+        files =
+            f?.readdir(f?.cwd())?.filter((f) => f !== '.' && f !== '..') ?? [];
+    });
 
     async function uploadFile(e: Event) {
         const files = (e.target as HTMLInputElement).files;
@@ -12,8 +25,14 @@
         if (!files) return;
 
         for (const file of files) {
-            fs.addFile(file.name, await file.text());
+            $fs?.writeFile(file.name, await file.text());
         }
+
+        // Sync indexedDB with virtual fs
+        $fs?.syncfs(false, (err) => {
+            if (err) console.error(err);
+            $fs = $fs;
+        });
 
         uploadIsActive = false;
     }
@@ -26,11 +45,43 @@
     function onDragLeave() {
         uploadIsActive = false;
     }
+
+    function downloadFile(filename: string) {
+        const file = new Blob(
+            [$fs?.readFile(filename, { encoding: 'utf8' }) ?? ''],
+            {
+                type: 'text/plain',
+            },
+        );
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(file);
+        a.download = filename;
+        a.click();
+    }
+
+    function deleteFile(filename: string) {
+        $fs?.unlink(filename);
+        $fs?.syncfs(false, (err) => {
+            if (err) console.error(err);
+            $fs = $fs;
+        });
+        $fs = $fs;
+    }
 </script>
 
+{#if $fs === undefined}
+    <p>Loading...</p>
+{/if}
+
 <ul>
-    {#each $files.sort() as key}
-        <li on:click={() => (selectedFile = key)}>{key}</li>
+    {#each files ?? [] as key}
+        <li on:click={() => (selectedFile = key)}>
+            {key}
+            <div class="toolbar">
+                <button on:click={() => deleteFile(key)}>🗑️</button>
+                <button on:click={() => downloadFile(key)}>💾</button>
+            </div>
+        </li>
     {/each}
 </ul>
 <div class="wrapper">
@@ -65,6 +116,19 @@
         z-index: 1;
         flex: 1;
         margin: 0;
+        font-size: 1em;
+        font-family:
+            system-ui,
+            -apple-system,
+            BlinkMacSystemFont,
+            'Segoe UI',
+            Roboto,
+            Oxygen,
+            Ubuntu,
+            Cantarell,
+            'Open Sans',
+            'Helvetica Neue',
+            sans-serif;
     }
 
     li {
@@ -75,6 +139,8 @@
         width: 100%;
         box-sizing: border-box;
         background-color: #fff;
+        display: flex;
+        justify-content: space-between;
     }
 
     li:first-child {
@@ -133,5 +199,26 @@
 
     .dropbox.active {
         opacity: 0.3;
+    }
+
+    .toolbar {
+        display: none;
+        justify-content: flex-end;
+        gap: 2px;
+    }
+
+    li:hover .toolbar {
+        display: inline;
+    }
+
+    .toolbar button {
+        padding: 0px;
+        border: none;
+        background-color: transparent;
+        cursor: pointer;
+    }
+
+    .toolbar button:hover {
+        filter: brightness(0.8);
     }
 </style>

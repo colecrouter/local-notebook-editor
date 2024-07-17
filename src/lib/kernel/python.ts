@@ -1,13 +1,24 @@
+import type { EmscriptenFS } from "$lib/fs";
 import { loadPyodide } from "pyodide";
 import { writable } from "svelte/store";
 
-const pipRegex = /(%|!)(\w+)\s(\w+)\s(.*)/g;
+const pipRegex = /(%|!)(\w+)\s(\w+)\s(.*)/gm;
 
 export const python = async () => {
     const pyodide = await loadPyodide({
         indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.1/full/"  // Update to the latest version if needed
     });
     const output = writable<string>("");
+
+
+    const FS = pyodide.FS as EmscriptenFS;
+    FS.mount(pyodide.FS.filesystems.IDBFS, { root: '.' }, "/home/pyodide");
+    // FS.chdir("/home/pyodide");
+    FS.syncfs(true, (err) => {
+        if (err) {
+            console.error(err);
+        }
+    });
 
     const setupOutputRedirection = () => {
         if (!pyodide) return;
@@ -34,11 +45,16 @@ export const python = async () => {
 
     const execute = async (code: string) => {
         // Remove all % and ! magics, if it's pip install, then install the package
-        const matches = code.match(pipRegex);
-        if (matches) {
-            for (const match of matches) {
-                console.log(match);
-                const [, magic, command, , name] = pipRegex.exec(match) ?? ['', '', '', '', ''];
+
+        const results = new Array<RegExpExecArray>();
+        let match: RegExpExecArray | null;
+        while ((match = pipRegex.exec(code)) !== null) {
+            results.push(match);
+        }
+
+        if (results) {
+            for (const match of results) {
+                const [, magic, command, , name] = match ?? Array(5).fill('');
                 if (magic === "%") {
                     if (command === "pip") {
                         try {

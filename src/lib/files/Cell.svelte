@@ -60,7 +60,7 @@
 
 <style>
     .cell {
-        margin: 10px;
+        margin: 4px;
         border: 1px solid transparent;
         border-radius: 4px;
         position: relative;
@@ -77,7 +77,7 @@
         padding: 6px;
         position: absolute;
         top: -16px;
-        right: -8px;
+        right: 4px;
         gap: 2px;
         background-color: #f4f4f4;
         border: 1px solid #ccc;

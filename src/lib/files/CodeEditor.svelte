@@ -1,7 +1,7 @@
 <script lang="ts">
     import loader from '@monaco-editor/loader';
-    import { onMount, onDestroy } from 'svelte';
     import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
+    import { onDestroy, onMount } from 'svelte';
 
     let monaco: typeof Monaco;
     let editorContainer: HTMLElement;
@@ -35,6 +35,9 @@
         // Register event listener for typing
         editor.onDidChangeModelContent(() => {
             text = editor.getValue();
+            editorContainer.dispatchEvent(
+                new CustomEvent('updated', { bubbles: true }),
+            );
         });
 
         let ignoreEvent = false;

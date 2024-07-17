@@ -1,33 +1,55 @@
 <script lang="ts">
-    import {
-        IndexedDBFileSystem,
-        SessionFileSystem,
-        VirtualFileSystem,
-    } from '$lib/fs';
-    import type { ComponentType, SvelteComponent } from 'svelte';
-    import Sidebar from './Sidebar.svelte';
-    import Text from '$lib/files/Text.svelte';
     import Notebook from '$lib/files/Notebook.svelte';
+    import Text from '$lib/files/Text.svelte';
+    import { indexedDBFS, type EmscriptenFS } from '$lib/fs';
+    import { onMount, type ComponentType } from 'svelte';
+    import Sidebar from './Sidebar.svelte';
+    import { writable } from 'svelte/store';
 
-    let fs = new IndexedDBFileSystem();
+    let fs = writable<EmscriptenFS>();
     let selectedFile = '';
-    let props: Record<string, any> = {};
+    let data: unknown;
+
+    onMount(async () => {
+        fs.set(await indexedDBFS());
+        editor.addEventListener('updated', (e) => {
+            updateFile(e);
+        });
+    });
 
     let currentComponent: ComponentType;
 
     $: {
-        if (selectedFile) {
+        if (selectedFile && $fs) {
             if (selectedFile.endsWith('.ipynb')) {
-                const notebook = fs.readFile(selectedFile);
+                const notebook = $fs.readFile(selectedFile, {
+                    encoding: 'utf8',
+                });
                 currentComponent = Notebook;
-                props = { notebook: JSON.parse(notebook ?? '') };
+                data = JSON.parse(notebook ?? '');
             } else {
-                const text = fs.readFile(selectedFile);
+                const text = $fs.readFile(selectedFile, { encoding: 'utf8' });
                 currentComponent = Text;
-                props = { text };
+                data = text;
             }
         }
     }
+
+    const updateFile = (e: Event) => {
+        $fs.writeFile(
+            selectedFile,
+            typeof data === 'string' ? data : JSON.stringify(data),
+            {
+                encoding: 'utf8',
+            },
+        );
+        $fs.syncfs(false, (err) => {
+            if (err) {
+                console.error(err);
+            }
+        });
+        console.log('File updated');
+    };
 
     let editor: HTMLElement;
 </script>
@@ -37,10 +59,9 @@
         <Sidebar {fs} bind:selectedFile />
     </div>
 
-    <div class="content">
+    <div class="content" bind:this={editor}>
         {#if currentComponent}
-            <div bind:this={editor}></div>
-            <svelte:component this={currentComponent} {...props} />
+            <svelte:component this={currentComponent} {data} />
         {/if}
     </div>
 </div>

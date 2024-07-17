@@ -1,9 +1,10 @@
 <script lang="ts">
-    import type { VirtualFileSystem } from '$lib/fs';
+    import type { EmscriptenFS } from '$lib/fs';
+    import type { Writable } from 'svelte/store';
     import FileTree from './FileTree.svelte';
 
     let sidebar: HTMLDivElement;
-    let sidebarWidth = 200;
+    let sidebarWidth = 300;
     let isDragging = false;
     function startResizing(e: MouseEvent) {
         if (!isDragging) return;
@@ -32,7 +33,7 @@
         window.removeEventListener('mouseup', stopResizing);
     }
 
-    export let fs: VirtualFileSystem;
+    export let fs: Writable<EmscriptenFS | undefined>;
     export let selectedFile: string;
 </script>
 
@@ -44,7 +45,6 @@
 <style>
     .sidebar {
         background-color: #f4f4f4;
-        width: 200px;
         min-width: 10px;
         max-width: 600px;
         height: 100vh;
