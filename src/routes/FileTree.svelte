@@ -87,10 +87,12 @@
     <ul>
         {#each files as key}
             <li on:click={() => (selectedFile = key)}>
-                {key}
-                <div class="toolbar">
-                    <button on:click={() => deleteFile(key)}>🗑️</button>
-                    <button on:click={() => downloadFile(key)}>💾</button>
+                <div>
+                    {key}
+                    <div class="toolbar">
+                        <button on:click={() => deleteFile(key)}>🗑️</button>
+                        <button on:click={() => downloadFile(key)}>💾</button>
+                    </div>
                 </div>
             </li>
         {/each}
@@ -128,14 +130,14 @@
         box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
         height: 100%; */
         width: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        align-items: srtetch;
         z-index: 1;
         flex: 1;
         margin: 0;
         font-size: 1em;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: stretch;
         font-family:
             system-ui,
             -apple-system,
@@ -158,8 +160,18 @@
         width: 100%;
         box-sizing: border-box;
         background-color: var(--background-accent);
-        display: flex;
+        font-family: Arial, sans-serif;
+    }
+
+    li > div {
+        display: inline-flex;
         justify-content: space-between;
+        width: calc(100% - 1.5em - 10px);
+    }
+
+    li::before {
+        content: '📄';
+        margin-right: 10px;
     }
 
     li:first-child {
@@ -220,6 +232,7 @@
         display: none;
         justify-content: flex-end;
         gap: 2px;
+        margin-left: auto;
     }
 
     li:hover .toolbar {
