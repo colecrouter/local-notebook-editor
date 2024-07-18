@@ -52,14 +52,13 @@
 
 <!-- <div bind:this={editorContainer}></div> -->
 <div class="notebook" bind:this={container}>
-    {#key data}
-        {#each data.cells as cell, i}
-            <AddBlock index={i} {addBlock} />
-            <div class="cell-wrapper">
-                <Cell {cell} deleteCell={() => deleteBlock(i)} />
-            </div>
-        {/each}
-    {/key}
+    {#each data.cells as cell, i}
+        <AddBlock index={i} {addBlock} />
+        <div class="cell-wrapper">
+            <Cell {cell} deleteCell={() => deleteBlock(i)} />
+        </div>
+    {/each}
+    <AddBlock index={data.cells.length} {addBlock} />
 </div>
 
 <style>
@@ -69,6 +68,5 @@
         padding-top: 20px;
         display: flex;
         flex-direction: column;
-        gap: 4px;
     }
 </style>
