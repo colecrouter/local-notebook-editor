@@ -71,20 +71,27 @@
 
 {#if $fs === undefined}
     <p>Loading...</p>
+{:else}
+    <ul>
+        {#each files as key}
+            <li on:click={() => (selectedFile = key)}>
+                {key}
+                <div class="toolbar">
+                    <button on:click={() => deleteFile(key)}>🗑️</button>
+                    <button on:click={() => downloadFile(key)}>💾</button>
+                </div>
+            </li>
+        {/each}
+    </ul>
 {/if}
 
-<ul>
-    {#each files ?? [] as key}
-        <li on:click={() => (selectedFile = key)}>
-            {key}
-            <div class="toolbar">
-                <button on:click={() => deleteFile(key)}>🗑️</button>
-                <button on:click={() => downloadFile(key)}>💾</button>
-            </div>
-        </li>
-    {/each}
-</ul>
 <div class="wrapper">
+    {#if !files.length}
+        <div class="noclick">
+            <h4>No files found</h4>
+            <p>Drag and drop, or click here to upload files</p>
+        </div>
+    {/if}
     <input
         type="file"
         multiple
@@ -220,5 +227,18 @@
 
     .toolbar button:hover {
         filter: brightness(0.8);
+    }
+
+    .noclick {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        width: 100%;
+        gap: 20px;
+        pointer-events: none;
+        touch-action: none;
+        text-align: center;
     }
 </style>
