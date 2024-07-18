@@ -25,7 +25,9 @@
         // Your monaco instance is ready, let's display some code!
         editor = monaco.editor.create(editorContainer, {
             value: data,
-            theme: 'vs-light',
+            theme: window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'vs-dark'
+                : 'vs-light',
             scrollBeyondLastLine: false,
             renderWhitespace: 'all',
             minimap: {
