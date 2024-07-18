@@ -14,6 +14,7 @@
     import type { Writable } from 'svelte/store';
 
     export let cell: Cell;
+    export let deleteCell: () => void;
     let editing: boolean;
     let kernel: Writable<Kernel>;
     let output =
@@ -67,7 +68,7 @@
                 <button on:click={() => (editing = true)}>✏️</button>
             {/if}
         {/if}
-        <button>🗑️</button>
+        <button disabled={isExecuting} on:click={deleteCell}>🗑️</button>
     </div>
 
     {#if output}
