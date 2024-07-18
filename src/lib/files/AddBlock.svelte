@@ -50,9 +50,13 @@
         padding: 4px;
         border: 1px solid var(--border);
         border-radius: 4px;
-        background-color: white;
+        background-color: var(--background);
         cursor: pointer;
         position: relative;
         top: -12px;
+    }
+
+    button:hover {
+        background-color: var(--background-accent);
     }
 </style>
