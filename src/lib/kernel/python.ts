@@ -27,7 +27,6 @@ export const python = async () => {
             write: (buffer: Uint8Array) => {
                 const text = new TextDecoder().decode(buffer);
                 output.update(current => current + text);
-                console.log(text);
                 return buffer.length;
             }
         });
@@ -72,9 +71,7 @@ export const python = async () => {
         code = code.replaceAll(pipRegex, "");
 
         try {
-            const text = await pyodide.runPythonAsync(code);
-
-            output.update(current => current + text);
+            await pyodide.runPythonAsync(code);
         } catch (error) {
             output.update(current => current + error);
         }

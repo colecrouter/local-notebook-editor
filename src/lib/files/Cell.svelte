@@ -1,3 +1,9 @@
+<script lang="ts" context="module">
+    import { Mutex } from 'async-mutex';
+
+    const runningMutex = new Mutex();
+</script>
+
 <script lang="ts">
     import CodeEditor from '$lib/files/CodeEditor.svelte';
     import MarkdownEditor from '$lib/files/MarkdownEditor.svelte';
@@ -12,23 +18,34 @@
     let kernel: Writable<Kernel>;
     let output =
         cell.cell_type === 'code' ? formatNotebookOutput(cell.outputs) : '';
+    let isExecuting = false;
 
     kernel = getContext<Writable<Kernel>>('kernel');
 
     const runCode = async () => {
+        if (isExecuting) return;
+        isExecuting = true;
         let unsubscribe = $kernel.output.subscribe((value) => {
-            console.log(value);
-            output = value;
+            if (value !== undefined) {
+                output = value;
+                console.log(value);
+            }
         });
 
-        $kernel.output.set(''); // Clear previous output
-        await $kernel.execute(
-            typeof cell.source === 'string'
-                ? cell.source
-                : cell.source.join(''),
-        );
-
-        unsubscribe();
+        // Lock the kernel to prevent concurrent execution
+        const release = await runningMutex.acquire();
+        try {
+            $kernel.output.set(''); // Clear previous output
+            await $kernel.execute(
+                typeof cell.source === 'string'
+                    ? cell.source
+                    : cell.source.join(''),
+            );
+        } finally {
+            release();
+            unsubscribe();
+            isExecuting = false;
+        }
     };
 </script>
 
@@ -40,7 +57,9 @@
     {/if}
     <div class="toolbar">
         {#if cell.cell_type === 'code'}
-            <button on:click={runCode}>▶️</button>
+            <button on:click={runCode} disabled={isExecuting}>
+                {isExecuting ? '⏳' : '▶️'}
+            </button>
         {:else if cell.cell_type === 'markdown'}
             {#if editing}
                 <button on:click={() => (editing = false)}>💾</button>
