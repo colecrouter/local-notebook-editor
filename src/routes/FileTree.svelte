@@ -217,9 +217,9 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        border: 8px dashed var(--background);
-        background-color: #000;
-        color: var(--background);
+        border: 8px dashed var(--text);
+        background-color: var(--background-accent);
+        color: var(--text);
         height: 100%;
         width: 100%;
     }
