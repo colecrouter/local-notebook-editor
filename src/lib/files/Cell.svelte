@@ -97,7 +97,7 @@
     }
 
     .cell:hover {
-        border: 1px solid #ccc;
+        border: 1px solid var(--border);
     }
 
     .toolbar {
@@ -108,21 +108,21 @@
         top: -16px;
         right: 4px;
         gap: 2px;
-        background-color: #f4f4f4;
-        border: 1px solid #ccc;
+        background-color: var(--background-accent);
+        border: 1px solid var(--border);
         border-radius: 4px;
     }
 
     .toolbar button {
         padding: 4px;
-        border: 1px solid #ccc;
+        border: 1px solid var(--border);
         border-radius: 4px;
-        background-color: white;
+        background-color: var(--background);
         cursor: pointer;
     }
 
     .toolbar button:hover {
-        background-color: #f9f9f9;
+        background-color: var(--background-accent);
     }
 
     .output {

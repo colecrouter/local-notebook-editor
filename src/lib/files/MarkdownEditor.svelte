@@ -41,16 +41,18 @@
     }
 
     .markdown-container:has(.markdown-editor:focus) {
-        border: 1px solid #ccc;
+        border: 1px solid var(--border);
         border-radius: 4px;
     }
 
     .markdown-editor {
         width: 100%;
-        /* border: 1px solid #ccc; */
+        /* border: 1px solid var(--border); */
         border: none;
         padding: 10px;
         /* box-sizing: border-box; */
+        background-color: var(--background);
+        color: var(--text);
     }
 
     .markdown-editor:focus {

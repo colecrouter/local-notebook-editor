@@ -25,7 +25,7 @@
         height: 1px;
         margin: 2px 0;
         width: 100%;
-        background-color: #ccc;
+        background-color: var(--border);
         opacity: 0;
         display: flex;
         justify-content: center;
@@ -48,7 +48,7 @@
 
     button {
         padding: 4px;
-        border: 1px solid #ccc;
+        border: 1px solid var(--border);
         border-radius: 4px;
         background-color: white;
         cursor: pointer;

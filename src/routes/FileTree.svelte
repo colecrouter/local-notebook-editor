@@ -157,7 +157,7 @@
         height: fit-content;
         width: 100%;
         box-sizing: border-box;
-        background-color: #fff;
+        background-color: var(--background-accent);
         display: flex;
         justify-content: space-between;
     }
@@ -166,12 +166,8 @@
         margin-top: 40px;
     }
 
-    li:nth-child(odd) {
-        background-color: #f9f9f9;
-    }
-
     li:hover {
-        background-color: #f4f4f4;
+        filter: brightness(0.8);
     }
 
     .wrapper {
@@ -209,9 +205,9 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        border: 8px dashed #fff;
+        border: 8px dashed var(--background);
         background-color: #000;
-        color: #fff;
+        color: var(--background);
         height: 100%;
         width: 100%;
     }

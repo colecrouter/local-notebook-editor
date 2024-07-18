@@ -44,14 +44,14 @@
 
 <style>
     .sidebar {
-        background-color: #f4f4f4;
+        background-color: var(--background-accent);
         min-width: 10px;
         max-width: 600px;
         height: 100vh;
         position: relative;
         top: 0;
         left: 0;
-        border-right: 1px solid #ccc;
+        border-right: 1px solid var(--border);
     }
 
     .dragger {
