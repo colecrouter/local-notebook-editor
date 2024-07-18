@@ -22,7 +22,8 @@
     $: editing, compileMarkdown();
 </script>
 
-<div class="markdown-container">
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<div class="markdown-container" on:dblclick={() => (editing = true)}>
     {#if editing}
         <textarea class="markdown-editor" bind:value={markdown}></textarea>
     {:else}
