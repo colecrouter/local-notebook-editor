@@ -83,30 +83,30 @@
             </li>
         {/each}
     </ul>
-{/if}
 
-<div class="wrapper">
-    {#if !files.length}
-        <div class="noclick">
-            <h4>No files found</h4>
-            <p>Drag and drop, or click here to upload files</p>
+    <div class="wrapper">
+        {#if !files.length}
+            <div class="noclick">
+                <h4>No files found</h4>
+                <p>Drag and drop, or click here to upload files</p>
+            </div>
+        {/if}
+        <input
+            type="file"
+            multiple
+            title="upload"
+            on:input={uploadFile}
+            on:dragenter={onDragEnter}
+            on:dragleave={onDragLeave} />
+        <div
+            class="dropbox"
+            role="button"
+            tabindex="0"
+            class:active={uploadIsActive}>
+            <h4>Drop files here</h4>
         </div>
-    {/if}
-    <input
-        type="file"
-        multiple
-        title="upload"
-        on:input={uploadFile}
-        on:dragenter={onDragEnter}
-        on:dragleave={onDragLeave} />
-    <div
-        class="dropbox"
-        role="button"
-        tabindex="0"
-        class:active={uploadIsActive}>
-        <h4>Drop files here</h4>
     </div>
-</div>
+{/if}
 
 <style>
     ul {
