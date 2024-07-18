@@ -14,14 +14,13 @@ export const python = async () => {
 
     const FS = pyodide.FS as EmscriptenFS;
     FS.mount(pyodide.FS.filesystems.IDBFS, { root: '.' }, "/home/pyodide");
-    // FS.chdir("/home/pyodide");
-    FS.syncfs(true, (err) => {
-        if (err) {
-            console.error(err);
-        }
-    });
+    FS.chdir("/home/pyodide");
+    await new Promise((resolve, reject) => FS.syncfs(true, (err) => {
+        if (err) reject(err);
+        else resolve(undefined);
+    }));
 
-    if (!pyodide) return;
+    console.log(FS.readdir("/home/pyodide"));
 
     pyodide.setStdout({
         write: (buffer: Uint8Array) => {

@@ -32,7 +32,6 @@
         let unsubscribe = $kernel.output.subscribe((value) => {
             if (value !== undefined) {
                 output = value;
-                console.log('Receiving', value);
             }
         });
         try {

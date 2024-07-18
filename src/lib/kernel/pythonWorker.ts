@@ -1,3 +1,4 @@
+import type { EmscriptenFS } from "$lib/fs";
 import { loadPyodide, type PyodideInterface } from "pyodide";
 
 console.log("Worker loaded");
@@ -6,8 +7,18 @@ const pyodideReadyPromise = loadPyodide({
     indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.1/full/"
 });
 
+pyodideReadyPromise.then(async (pyodide) => {
+    const FS = pyodide.FS as EmscriptenFS;
+    FS.mount(pyodide.FS.filesystems.IDBFS, { root: '.' }, "/home/pyodide");
+    FS.chdir("/home/pyodide");
+    await new Promise((resolve, reject) => FS.syncfs(true, (err) => {
+        if (err) reject(err);
+        else resolve(undefined);
+    }));
+});
+
+
 self.onmessage = async (event) => {
-    // Ensure Pyodide is fully loaded
     const pyodide = await pyodideReadyPromise;
     console.log(event.data);
 

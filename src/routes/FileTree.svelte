@@ -25,7 +25,13 @@
         if (!files) return;
 
         for (const file of files) {
-            $fs?.writeFile(file.name, await file.text());
+            $fs?.writeFile(
+                file.name,
+                new Uint8Array(await file.arrayBuffer()),
+                {
+                    encoding: 'binary',
+                },
+            );
         }
 
         // Sync indexedDB with virtual fs

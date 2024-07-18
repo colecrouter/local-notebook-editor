@@ -22,8 +22,6 @@
     });
 
     function addBlock(type: 'code' | 'markdown', index: number) {
-        console.log('Adding block');
-        console.log(data.cells);
         data.cells.splice(index, 0, {
             cell_type: type,
             source: type === 'code' ? [''] : '',
@@ -31,7 +29,6 @@
             execution_count: 0,
             metadata: { collapsed: false, scrolled: false },
         });
-        console.log(data.cells);
         data = { ...data };
 
         // Update file

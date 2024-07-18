@@ -63,7 +63,9 @@
 
     <div class="content" bind:this={editor}>
         {#if currentComponent}
-            <svelte:component this={currentComponent} {data} />
+            {#key currentComponent}
+                <svelte:component this={currentComponent} {data} />
+            {/key}
         {/if}
     </div>
 </div>
