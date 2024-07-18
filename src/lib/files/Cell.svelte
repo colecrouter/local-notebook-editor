@@ -31,7 +31,7 @@
         const release = await runningMutex.acquire();
         let unsubscribe = $kernel.output.subscribe((value) => {
             if (value !== undefined) {
-                output = value;
+                output = `<pre>${value}</pre>`;
             }
         });
         try {
@@ -82,7 +82,7 @@
 
     {#if output}
         <div class="output">
-            <pre>{output}</pre>
+            {@html output}
         </div>
     {/if}
 </div>

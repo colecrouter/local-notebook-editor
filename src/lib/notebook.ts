@@ -32,7 +32,7 @@ export type CodeOutput = ExecuteResult | DisplayData | StreamOutput | ErrorOutpu
 interface StreamOutput {
     output_type: 'stream';
     name: "stdout" | "stderr";
-    text: string;
+    text: string | string[];
 }
 
 interface ErrorOutput {
@@ -48,7 +48,7 @@ interface DisplayData {
         "text/plain"?: string;
         "image/png"?: string;
         "application/json"?: Record<string, unknown>;
-        "text/html"?: string;
+        "text/html"?: string | string[];
     };
     metadata: Record<string, unknown>;
 }
