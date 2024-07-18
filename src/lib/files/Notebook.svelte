@@ -5,6 +5,7 @@
     import AddBlock from '$lib/files/AddBlock.svelte';
     import Cell from '$lib/files/Cell.svelte';
     import { python } from '$lib/kernel/python';
+    import { pythonAsync } from '$lib/kernel/pythonAsync';
     import type { Kernel } from '$lib/kernel/type';
     import type { Notebook } from '$lib/notebook';
     import { onMount, setContext } from 'svelte';
@@ -16,7 +17,7 @@
 
     setContext('kernel', store);
     onMount(async () => {
-        kernel = await python();
+        kernel = await pythonAsync();
         store.set(kernel);
     });
 

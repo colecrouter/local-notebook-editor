@@ -26,15 +26,15 @@
     const runCode = async () => {
         if (isExecuting) return;
         isExecuting = true;
-        let unsubscribe = $kernel.output.subscribe((value) => {
-            if (value !== undefined) {
-                output = value;
-                console.log(value);
-            }
-        });
 
         // Lock the kernel to prevent concurrent execution
         const release = await runningMutex.acquire();
+        let unsubscribe = $kernel.output.subscribe((value) => {
+            if (value !== undefined) {
+                output = value;
+                console.log('Receiving', value);
+            }
+        });
         try {
             $kernel.output.set(''); // Clear previous output
             await $kernel.execute(

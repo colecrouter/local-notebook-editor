@@ -1,4 +1,5 @@
 import type { EmscriptenFS } from "$lib/fs";
+import type { Kernel } from "$lib/kernel/type";
 import { loadPyodide } from "pyodide";
 import { writable } from "svelte/store";
 
@@ -20,27 +21,23 @@ export const python = async () => {
         }
     });
 
-    const setupOutputRedirection = () => {
-        if (!pyodide) return;
+    if (!pyodide) return;
 
-        pyodide.setStdout({
-            write: (buffer: Uint8Array) => {
-                const text = new TextDecoder().decode(buffer);
-                output.update(current => current + text);
-                return buffer.length;
-            }
-        });
+    pyodide.setStdout({
+        write: (buffer: Uint8Array) => {
+            const text = new TextDecoder().decode(buffer);
+            output.update(current => current + text);
+            return buffer.length;
+        }
+    });
 
-        pyodide.setStderr({
-            write: (buffer: Uint8Array) => {
-                const text = new TextDecoder().decode(buffer);
-                output.update(current => current + text);
-                return buffer.length;
-            }
-        });
-    };
-
-    setupOutputRedirection();
+    pyodide.setStderr({
+        write: (buffer: Uint8Array) => {
+            const text = new TextDecoder().decode(buffer);
+            output.update(current => current + text);
+            return buffer.length;
+        }
+    });
 
     const execute = async (code: string) => {
         // Remove all % and ! magics, if it's pip install, then install the package
@@ -77,5 +74,5 @@ export const python = async () => {
         }
     };
 
-    return Object.freeze({ execute, output });
+    return Object.freeze({ execute, output }) as Kernel;
 };
