@@ -58,9 +58,19 @@
     {/if}
     <div class="toolbar">
         {#if cell.cell_type === 'code'}
-            <button on:click={runCode} disabled={isExecuting}>
-                {isExecuting ? '⏳' : '▶️'}
-            </button>
+            {#if isExecuting}
+                {#if $kernel.interruptExecution !== undefined}
+                    <button
+                        on:click={$kernel.interruptExecution}
+                        disabled={!isExecuting}>
+                        ⏹️
+                    </button>
+                {:else}
+                    <button disabled={isExecuting}> ⏳ </button>
+                {/if}
+            {:else}
+                <button on:click={runCode} disabled={isExecuting}>▶️</button>
+            {/if}
         {:else if cell.cell_type === 'markdown'}
             {#if editing}
                 <button on:click={() => (editing = false)}>💾</button>

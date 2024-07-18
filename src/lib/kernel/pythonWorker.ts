@@ -1,5 +1,6 @@
 import { loadPyodide, type PyodideInterface } from "pyodide";
 
+console.log("Worker loaded");
 
 const pyodideReadyPromise = loadPyodide({
     indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.1/full/"
@@ -8,37 +9,47 @@ const pyodideReadyPromise = loadPyodide({
 self.onmessage = async (event) => {
     // Ensure Pyodide is fully loaded
     const pyodide = await pyodideReadyPromise;
+    console.log(event.data);
 
-    const { code } = event.data;
+    const { code, cmd } = event.data;
 
-    pyodide.setStdout({
-        write: (buffer: Uint8Array) => {
-            const text = new TextDecoder().decode(buffer);
-            self.postMessage({ text });
-            return buffer.length;
-        }
-    });
+    switch (cmd) {
+        case "execute":
+            pyodide.setStdout({
+                write: (buffer: Uint8Array) => {
+                    const text = new TextDecoder().decode(buffer);
+                    self.postMessage({ text });
+                    return buffer.length;
+                }
+            });
 
-    pyodide.setStderr({
-        write: (buffer: Uint8Array) => {
-            const text = new TextDecoder().decode(buffer);
-            self.postMessage({ text });
-            return buffer.length;
-        }
-    });
+            pyodide.setStderr({
+                write: (buffer: Uint8Array) => {
+                    const text = new TextDecoder().decode(buffer);
+                    self.postMessage({ text });
+                    return buffer.length;
+                }
+            });
 
-    try {
-        // Handle Python package installations or other pre-processing
-        const modifiedCode = await preprocessCode(code, pyodide);
+            try {
+                // Handle Python package installations or other pre-processing
+                const modifiedCode = await preprocessCode(code, pyodide);
 
-        // Execute the Python code
-        await pyodide.runPythonAsync(modifiedCode);
-
-        // Send unique message to indicate the end of the execution
-        self.postMessage({ result: true });
-    } catch (error) {
-        // Send error information back to the main thread
-        self.postMessage({ error: (error as Error).message });
+                // Execute the Python code
+                await pyodide.runPythonAsync(modifiedCode);
+            } catch (error) {
+                // Send error information back to the main thread
+                self.postMessage({ error: (error as Error).message });
+            } finally {
+                // Send unique message to indicate the end of the execution
+                self.postMessage({ result: true });
+            }
+            break;
+        case "setInterruptBuffer":
+            pyodide.setInterruptBuffer(event.data.interruptBuffer);
+            break;
+        default:
+            throw new Error(`Unknown command: ${cmd}`);
     }
 };
 

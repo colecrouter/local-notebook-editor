@@ -4,10 +4,22 @@ import workerURL from './pythonWorker.ts?url';
 
 export const pythonAsync = async () => {
     const worker = new Worker(workerURL, { type: 'module' });
-    const output = writable("");
+
+    const interruptBuffer = new Uint8Array(new SharedArrayBuffer(1));
+    worker.postMessage({ cmd: "setInterruptBuffer", interruptBuffer });
+    const interruptExecution = () => {
+        // 2 stands for SIGINT.
+        interruptBuffer[0] = 2;
+    };
+
+    const output = writable();
 
     const execute = async (code: string) => {
-        worker.postMessage({ code });
+        // Reset the interrupt buffer
+        interruptBuffer[0] = 0;
+
+        // Send the code to the worker
+        worker.postMessage({ code, cmd: "execute" });
         await new Promise(resolve => {
             worker.onmessage = (event) => {
                 if (event.data.error) {
@@ -23,5 +35,5 @@ export const pythonAsync = async () => {
         });
     };
 
-    return Object.freeze({ execute, output }) as Kernel;
+    return Object.freeze({ execute, output, interruptExecution }) as Kernel;
 };
