@@ -59,13 +59,19 @@
         a.click();
     }
 
-    function deleteFile(filename: string) {
+    async function deleteFile(filename: string) {
         $fs?.unlink(filename);
-        $fs?.syncfs(false, (err) => {
+        await new Promise((resolve, reject) =>
+            $fs?.syncfs(false, (err) => {
+                if (err) reject(err);
+                resolve(err);
+            }),
+        );
+        $fs?.syncfs(true, (err) => {
             if (err) console.error(err);
             $fs = $fs;
+            if (selectedFile === filename) selectedFile = '';
         });
-        $fs = $fs;
     }
 </script>
 

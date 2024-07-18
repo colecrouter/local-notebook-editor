@@ -17,7 +17,7 @@
         });
     });
 
-    let currentComponent: ComponentType;
+    let currentComponent: ComponentType | null;
 
     $: {
         if (selectedFile && $fs) {
@@ -32,6 +32,8 @@
                 currentComponent = Text;
                 data = text;
             }
+        } else {
+            currentComponent = null;
         }
     }
 
