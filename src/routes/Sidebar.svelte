@@ -33,12 +33,11 @@
         window.removeEventListener('mouseup', stopResizing);
     }
 
-    export let fs: Writable<EmscriptenFS | undefined>;
     export let selectedFile: string;
 </script>
 
 <div class="sidebar" bind:this={sidebar} style:width={`${sidebarWidth}px`}>
-    <FileTree {fs} bind:selectedFile />
+    <FileTree bind:selectedFile />
     <div class="dragger" on:mousedown={handleDrag}></div>
 </div>
 

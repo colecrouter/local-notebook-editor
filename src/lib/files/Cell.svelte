@@ -10,18 +10,17 @@
     import { formatNotebookOutput } from '$lib/files/output';
     import type { Kernel } from '$lib/kernel/type';
     import type { Cell } from '$lib/notebook';
-    import { getContext, onDestroy, onMount } from 'svelte';
+    import { getContext } from 'svelte';
     import type { Writable } from 'svelte/store';
 
     export let cell: Cell;
     export let deleteCell: () => void;
     let editing: boolean;
-    let kernel: Writable<Kernel>;
     let output =
         cell.cell_type === 'code' ? formatNotebookOutput(cell.outputs) : '';
     let isExecuting = false;
 
-    kernel = getContext<Writable<Kernel>>('kernel');
+    const kernel = getContext<Writable<Kernel>>('kernel');
 
     const runCode = async () => {
         if (isExecuting) return;
@@ -45,6 +44,9 @@
             release();
             unsubscribe();
             isExecuting = false;
+
+            // Update FS in case any files were created
+            await $kernel.fs.refreshFiles();
         }
     };
 </script>

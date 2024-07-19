@@ -42,17 +42,14 @@
             );
         });
 
-        let ignoreEvent = false;
         const width = editorContainer.clientWidth;
         const updateHeight = () => {
             const contentHeight = Math.min(1000, editor.getContentHeight());
             editorContainer.style.width = `${width}px`;
             editorContainer.style.height = `${contentHeight}px`;
             try {
-                ignoreEvent = true;
                 editor.layout({ width, height: contentHeight });
             } finally {
-                ignoreEvent = false;
             }
         };
         editor.onDidContentSizeChange(updateHeight);

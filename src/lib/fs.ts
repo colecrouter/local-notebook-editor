@@ -111,7 +111,7 @@ export interface EmscriptenFS {
     lookup(parent: EmscriptenNode, name: string): EmscriptenNode;
     lookupNode(parent: EmscriptenNode, name: string): EmscriptenNode;
     lookupPath(path: string, opts?: { follow_mount?: boolean, recurse_count?: number; }): { path: string, node: EmscriptenNode; };
-    lstat(path: string): unknown;
+    lstat(path: string): EmscriptenStat;
     major(dev: number): number;
     makedev(ma: number, mi: number): number;
     mayCreate(dir: EmscriptenNode, name: string): boolean;
@@ -161,7 +161,7 @@ export interface EmscriptenFS {
     rename(old_path: string, new_path: string): void;
     rmdir(path: string): void;
     root: EmscriptenNode;
-    stat(path: string, dontFollow?: boolean): unknown;
+    stat(path: string, dontFollow?: boolean): EmscriptenStat;
     staticInit(): void;
     streams: EmscriptenStream[];
     symlink(oldpath: string, newpath: string): void;
@@ -224,6 +224,22 @@ interface EmscriptenStream {
     ungotten: number[];
     error: boolean;
     // Add other properties as needed
+}
+
+interface EmscriptenStat {
+    dev: number;
+    ino: number;
+    mode: number;
+    nlink: number;
+    uid: number;
+    gid: number;
+    rdev: number;
+    size: number;
+    atime: Date;
+    mtime: Date;
+    ctime: Date;
+    blksize: number;
+    blocks: number;
 }
 
 export const indexedDBFS = async () => {

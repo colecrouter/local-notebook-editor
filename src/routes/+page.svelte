@@ -2,13 +2,12 @@
     import Notebook from '$lib/files/Notebook.svelte';
     import Text from '$lib/files/Text.svelte';
     import { indexedDBFS, type EmscriptenFS } from '$lib/fs';
-    import { onMount, type ComponentType } from 'svelte';
+    import { onMount, setContext, type ComponentType } from 'svelte';
     import Sidebar from './Sidebar.svelte';
     import { writable } from 'svelte/store';
 
     let fs = writable<EmscriptenFS>();
-    let selectedFile = '';
-    let data: unknown;
+    setContext('fs', fs);
 
     onMount(async () => {
         fs.set(await indexedDBFS());
@@ -17,6 +16,8 @@
         });
     });
 
+    let selectedFile = '';
+    let data: unknown;
     let currentComponent: ComponentType | null;
 
     $: {
@@ -58,7 +59,7 @@
 
 <div class="wrapper">
     <div>
-        <Sidebar {fs} bind:selectedFile />
+        <Sidebar bind:selectedFile />
     </div>
 
     <div class="content" bind:this={editor}>

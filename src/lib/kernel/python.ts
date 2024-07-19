@@ -1,9 +1,11 @@
 import type { EmscriptenFS } from "$lib/fs";
-import type { Kernel } from "$lib/kernel/type";
+import type { Kernel, LS } from "$lib/kernel/type";
 import { loadPyodide } from "pyodide";
 import { writable } from "svelte/store";
 
-const pipRegex = /(%|!)(\w+)\s(\w+)\s(.*)/gm;
+export const pipRegex = /(%|!)(\w+)\s(\w+)\s(.*)/gm;
+
+const cachedFiles = writable<LS[]>([]);
 
 export const python = async () => {
     const pyodide = await loadPyodide({
@@ -70,8 +72,60 @@ export const python = async () => {
             await pyodide.runPythonAsync(code);
         } catch (error) {
             output.update(current => current + error);
+        } finally {
+            refreshFS(FS);
         }
     };
 
-    return Object.freeze({ execute, output }) as Kernel;
+    const refreshFiles = async () => refreshFS(FS);
+    const readFile = async (path: string) => FS.readFile(path, { encoding: 'binary' });
+    const writeFile = async (path: string, data: Uint8Array) => {
+        FS.writeFile(path, data, { encoding: 'binary' });
+        await refreshFiles();
+    };
+    const deleteFile = async (path: string) => {
+        FS.unlink(path);
+        await refreshFiles();
+    };
+
+    // Update the cached files
+    await refreshFiles();
+
+    const fs = Object.freeze({ refreshFiles, readFile, writeFile, deleteFile, cachedFiles });
+
+    return Object.freeze({ execute, output, fs }) satisfies Kernel;
+};
+
+// Read the filesystem and cache all files
+export const refreshFS = async (fs: EmscriptenFS): Promise<LS[]> => {
+    // Update first
+    await new Promise((resolve, reject) => fs.syncfs(false, (err) => {
+        if (err) reject(err);
+        else resolve(undefined);
+    }));
+    await new Promise((resolve, reject) => fs.syncfs(true, (err) => {
+        if (err) reject(err);
+        else resolve(undefined);
+    }));
+
+    const path = '/home/pyodide';
+    const files = fs.readdir(path);
+    const cached: Array<LS> = [];
+    // Need to go into each directory
+    for (const path of files) {
+        const stat = fs.stat(path);
+        if (stat.mode ^ 0x4000) {
+            const files = fs.readdir(path)
+                .filter((file) => ['.', '..'].indexOf(file) === -1);
+            for (const file of files) {
+                cached.push({ name: file, path: `${path}/${file}`, dir: false });
+            }
+        } else {
+            cached.push({ name: path, path, dir: false });
+        }
+    }
+
+    cachedFiles.set(cached);
+
+    return cached;
 };

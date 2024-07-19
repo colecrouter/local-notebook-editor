@@ -4,7 +4,6 @@
 <script lang="ts">
     import AddBlock from '$lib/files/AddBlock.svelte';
     import Cell from '$lib/files/Cell.svelte';
-    import { python } from '$lib/kernel/python';
     import { pythonAsync } from '$lib/kernel/pythonAsync';
     import type { Kernel } from '$lib/kernel/type';
     import type { Notebook } from '$lib/notebook';

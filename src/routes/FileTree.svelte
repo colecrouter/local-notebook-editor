@@ -1,9 +1,12 @@
 <script lang="ts">
-    import type { EmscriptenFS } from '$lib/fs';
-    import type { Writable } from 'svelte/store';
+    import { indexedDBFS, type EmscriptenFS } from '$lib/fs';
+    import { getContext, onMount } from 'svelte';
+    import { writable, type Writable } from 'svelte/store';
 
-    export let fs: Writable<EmscriptenFS | undefined>;
     export let selectedFile: string;
+
+    // Hacky workaround because a kernel doesn't exist yet so we can't use the fs store
+    const fs = getContext<Writable<EmscriptenFS>>('fs');
 
     let files: string[] = [];
     fs.subscribe(async (f) => {
@@ -53,12 +56,7 @@
     }
 
     function downloadFile(filename: string) {
-        const file = new Blob(
-            [$fs?.readFile(filename, { encoding: 'utf8' }) ?? ''],
-            {
-                type: 'text/plain',
-            },
-        );
+        const file = new Blob([$fs?.readFile(filename) ?? '']);
         const a = document.createElement('a');
         a.href = URL.createObjectURL(file);
         a.download = filename;

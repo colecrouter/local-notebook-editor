@@ -1,4 +1,5 @@
 import type { EmscriptenFS } from "$lib/fs";
+import { pipRegex } from "$lib/kernel/python";
 import { loadPyodide, type PyodideInterface } from "pyodide";
 
 console.log("Worker loaded");
@@ -59,13 +60,36 @@ self.onmessage = async (event) => {
         case "setInterruptBuffer":
             pyodide.setInterruptBuffer(event.data.interruptBuffer);
             break;
+        // case "readdir":
+        //     {
+        //         const files = pyodide.FS.readdir(event.data.path);
+        //         self.postMessage({ result: files });
+        //         break;
+        //     }
+        // case "readFile":
+        //     {
+        //         const data = pyodide.FS.readFile(event.data.path);
+        //         self.postMessage({ result: data });
+        //         break;
+        //     }
+        // case "writeFile":
+        //     {
+        //         pyodide.FS.writeFile(event.data.path, event.data.data);
+        //         self.postMessage({ result: true });
+        //         break;
+        //     }
+        // case "deleteFile":
+        //     {
+        //         pyodide.FS.unlink(event.data.path);
+        //         self.postMessage({ result: true });
+        //         break;
+        //     }
         default:
             throw new Error(`Unknown command: ${cmd}`);
     }
 };
 
 async function preprocessCode(code: string, pyodide: PyodideInterface) {
-    const pipRegex = /(%|!)(pip)\s(\w+)\s(.*)/gm;
     let modifiedCode = code;
 
     let match;
@@ -92,3 +116,19 @@ async function installPackage(packageName: string, pyodide: PyodideInterface) {
         throw error;
     }
 }
+
+// async function refreshFS(fs: EmscriptenFS, write = false) {
+//     // First sync the filesystem to the IDBFS
+//     if (write) {
+//         await new Promise((resolve, reject) => fs.syncfs(false, (err) => {
+//             if (err) reject(err);
+//             else resolve(undefined);
+//         }));
+//     }
+
+//     // Then sync the IDBFS to the filesystem
+//     await new Promise((resolve, reject) => fs.syncfs(true, (err) => {
+//         if (err) reject(err);
+//         else resolve(undefined);
+//     }));
+// }
