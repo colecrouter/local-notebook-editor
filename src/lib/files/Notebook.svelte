@@ -18,6 +18,7 @@
     onMount(async () => {
         kernel = await pythonAsync();
         store.set(kernel);
+        kernel.fs.refreshFiles();
     });
 
     function addBlock(type: 'code' | 'markdown', index: number) {

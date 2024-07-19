@@ -29,6 +29,8 @@ export const pythonAsync = async () => {
         indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.1/full/"
     });
     const FS = pyodide.FS as EmscriptenFS;
+    FS.mount(pyodide.FS.filesystems.IDBFS, { root: '.' }, "/home/pyodide");
+    FS.chdir("/home/pyodide");
 
     const execute = async (code: string) => {
         // Reset the interrupt buffer
@@ -48,8 +50,15 @@ export const pythonAsync = async () => {
                     resolve(event.data.result);
                 }
             };
-        }).finally(() => {
-            refreshFS(FS);
+        }).finally(async () => {
+            // Refresh fs
+            console.log(FS.readdir('/home/pyodide'));
+            await new Promise((resolve, reject) => FS.syncfs(true, (err) => {
+                if (err) reject(err);
+                else resolve(undefined);
+            }));
+            await refreshFS(FS);
+            console.log(FS.readdir('/home/pyodide'));
         });
     };
 
@@ -63,6 +72,7 @@ export const pythonAsync = async () => {
         FS.unlink(path);
         await refreshFiles();
     };
+
 
     // Update the cached files
     await refreshFiles();

@@ -22,8 +22,6 @@ export const python = async () => {
         else resolve(undefined);
     }));
 
-    console.log(FS.readdir("/home/pyodide"));
-
     pyodide.setStdout({
         write: (buffer: Uint8Array) => {
             const text = new TextDecoder().decode(buffer);
@@ -73,7 +71,12 @@ export const python = async () => {
         } catch (error) {
             output.update(current => current + error);
         } finally {
-            refreshFS(FS);
+            // Refresh fs
+            await new Promise((resolve, reject) => FS.syncfs(true, (err) => {
+                if (err) reject(err);
+                else resolve(undefined);
+            }));
+            await refreshFS(FS);
         }
     };
 
@@ -89,7 +92,7 @@ export const python = async () => {
     };
 
     // Update the cached files
-    await refreshFiles();
+    await refreshFS(FS);
 
     const fs = Object.freeze({ refreshFiles, readFile, writeFile, deleteFile, cachedFiles });
 
@@ -98,30 +101,35 @@ export const python = async () => {
 
 // Read the filesystem and cache all files
 export const refreshFS = async (fs: EmscriptenFS): Promise<LS[]> => {
-    // Update first
-    await new Promise((resolve, reject) => fs.syncfs(false, (err) => {
-        if (err) reject(err);
-        else resolve(undefined);
-    }));
+    // Sync filesystem first
     await new Promise((resolve, reject) => fs.syncfs(true, (err) => {
         if (err) reject(err);
         else resolve(undefined);
     }));
+    await new Promise((resolve, reject) => fs.syncfs(false, (err) => {
+        if (err) reject(err);
+        else resolve(undefined);
+    }));
 
-    const path = '/home/pyodide';
-    const files = fs.readdir(path);
+    const basePath = '/home/pyodide';
+    const entries = fs.readdir(basePath);
     const cached: Array<LS> = [];
-    // Need to go into each directory
-    for (const path of files) {
-        const stat = fs.stat(path);
-        if (stat.mode ^ 0x4000) {
-            const files = fs.readdir(path)
-                .filter((file) => ['.', '..'].indexOf(file) === -1);
-            for (const file of files) {
-                cached.push({ name: file, path: `${path}/${file}`, dir: false });
+
+    // Iterate over each entry in the directory
+    for (const entry of entries) {
+        if (entry === '.' || entry === '..') continue; // Skip current and parent directory entries
+
+        const fullPath = `${basePath}/${entry}`;
+        const stat = fs.stat(fullPath);
+
+        if ((stat.mode & 0x4000) === 0x4000) { // Check if it's a directory
+            const subEntries = fs.readdir(fullPath)
+                .filter(subEntry => subEntry !== '.' && subEntry !== '..');
+            for (const subEntry of subEntries) {
+                cached.push({ name: subEntry, path: `${fullPath}/${subEntry}`, dir: false });
             }
         } else {
-            cached.push({ name: path, path, dir: false });
+            cached.push({ name: entry, path: fullPath, dir: false });
         }
     }
 

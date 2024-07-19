@@ -247,7 +247,6 @@ export const indexedDBFS = async () => {
         indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.1/full/"
     });
     const FS = pyodide.FS as EmscriptenFS;
-    // FS.mkdir("/assets");
     FS.mount(pyodide.FS.filesystems.IDBFS, { root: '.' }, "/home/pyodide");
     FS.chdir("/home/pyodide");
     return FS;

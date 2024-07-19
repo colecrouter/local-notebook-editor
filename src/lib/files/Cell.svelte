@@ -20,10 +20,10 @@
         cell.cell_type === 'code' ? formatNotebookOutput(cell.outputs) : '';
     let isExecuting = false;
 
-    const kernel = getContext<Writable<Kernel>>('kernel');
+    const kernel = getContext<Writable<Kernel | undefined>>('kernel');
 
     const runCode = async () => {
-        if (isExecuting) return;
+        if (!$kernel || isExecuting) return;
         isExecuting = true;
 
         // Lock the kernel to prevent concurrent execution
@@ -60,9 +60,9 @@
     <div class="toolbar">
         {#if cell.cell_type === 'code'}
             {#if isExecuting}
-                {#if $kernel.interruptExecution !== undefined}
+                {#if $kernel?.interruptExecution !== undefined}
                     <button
-                        on:click={$kernel.interruptExecution}
+                        on:click={$kernel?.interruptExecution}
                         disabled={!isExecuting}>
                         ⏹️
                     </button>
